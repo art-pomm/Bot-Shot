@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>bot_shot</name>
+  <version>0.0.0</version>
+  <description>
+    BotShot
+  </description>
+  <maintainer email="manipulation-student@mit.edu">IIWA</maintainer>
+  <author>IIWA</author>
+  <license>N/A</license>
+</package>
