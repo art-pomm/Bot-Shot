@@ -34,9 +34,13 @@
         </box>
       </geometry>
       <drake:proximity_properties>
-        <drake:compliant_hydroelastic/>
-        <drake:hydroelastic_modulus>1.0e6</drake:hydroelastic_modulus>
-      </drake:proximity_properties>
+          <drake:point_contact_stiffness>
+            20000
+          </drake:point_contact_stiffness>
+          <drake:hunt_crossley_dissipation>
+            0.1
+          </drake:hunt_crossley_dissipation>
+        </drake:proximity_properties>
     </collision>
   </link>
   <frame name="table_top_center">
