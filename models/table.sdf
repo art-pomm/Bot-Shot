@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="table">
+    <link name="ground">
+      <pose>0.0 0.0 0.25 0 0 0</pose>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>0.8 1.5 0.015</size>
+          </box>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.8 1.5 0.015</size>
+          </box>
+        </geometry>
+        <drake:proximity_properties>
+          <drake:point_contact_stiffness>
+            20000
+          </drake:point_contact_stiffness>
+          <drake:hunt_crossley_dissipation>
+            0.1
+          </drake:hunt_crossley_dissipation>
+        </drake:proximity_properties>
+      </collision>
+    </link>
+    <joint name="ground_weld" type="fixed">
+      <parent>world</parent>
+      <child>ground</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+  </model>
+</sdf>

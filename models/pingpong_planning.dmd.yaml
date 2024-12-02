@@ -1,0 +1,37 @@
+directives:
+#Add schunk
+- add_model:
+    name: gripper
+    file: package://manipulation/schunk_wsg_50_welded_fingers.sdf
+# Add table
+- add_model:
+    name: table
+    file: package://bot_shot/models/table.sdf
+# Add cameras
+- add_model:
+    name: camera0
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera0::base
+    X_PC:
+        translation: [0, 0.5, 1.25]
+        rotation: !Rpy { deg: [180, 0, 0]}
+- add_model:
+    name: camera1
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera1::base
+    X_PC:
+        translation: [0.6, 0.5, 0.25]
+        rotation: !Rpy { deg: [180, 90, 0]}
+- add_model:
+    name: camera2
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera2::base
+    X_PC:
+        translation: [-0.6, 0.5, 0.25]
+        rotation: !Rpy { deg: [180, 90, 180]}
