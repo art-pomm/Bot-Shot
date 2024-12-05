@@ -35,6 +35,10 @@ directives:
 - add_model:
     name: table
     file: package://bot_shot/models/table.sdf
+# Add cup
+- add_model:
+    name: cup
+    file: package://bot_shot/models/cup.sdf
 # Add cameras
 - add_model:
     name: camera0
@@ -43,7 +47,7 @@ directives:
     parent: world
     child: camera0::base
     X_PC:
-        translation: [0, 0.5, 1.25]
+        translation: [0, 0.35, 1.25]
         rotation: !Rpy { deg: [180, 0, 0]}
 - add_model:
     name: camera1
@@ -52,7 +56,7 @@ directives:
     parent: world
     child: camera1::base
     X_PC:
-        translation: [0.6, 0.5, 0.25]
+        translation: [1.2, 0.45, 0.25]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera2
@@ -61,8 +65,46 @@ directives:
     parent: world
     child: camera2::base
     X_PC:
-        translation: [-0.6, 0.5, 0.25]
+        translation: [-1.2, 0.45, 0.25]
         rotation: !Rpy { deg: [180, 90, 180]}
+- add_model:
+    name: camera3
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera3::base
+    X_PC:
+        translation: [0, -0.35, 1.25]
+        rotation: !Rpy { deg: [180, 0, 0]}
+- add_model:
+    name: camera4
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera4::base
+    X_PC:
+        translation: [1.2, -0.45, 0.25]
+        rotation: !Rpy { deg: [180, 90, 0]}
+- add_model:
+    name: camera5
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera5::base
+    X_PC:
+        translation: [-1.2, -0.45, 0.25]
+        rotation: !Rpy { deg: [180, 90, 180]}
+
+# Add cameras
+- add_model:
+    name: camera6
+    file: package://manipulation/camera_box.sdf
+- add_weld:
+    parent: world
+    child: camera6::base
+    X_PC:
+        translation: [0, 0, 0.3]
+        rotation: !Rpy { deg: [180, 0, 0]}
 cameras:
     camera0:
         name: camera0
@@ -79,6 +121,21 @@ cameras:
         depth: True
         X_PB:
             base_frame: camera2::base
+    camera3:
+        name: camera3
+        depth: True
+        X_PB:
+            base_frame: camera3::base
+    camera4:
+        name: camera4
+        depth: True
+        X_PB:
+            base_frame: camera4::base
+    camera5:
+        name: camera5
+        depth: True
+        X_PB:
+            base_frame: camera5::base
 # - add_model:
 #     name: camera1
 #     file: package://manipulation/camera_box.sdf

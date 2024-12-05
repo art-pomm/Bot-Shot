@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf xmlns:drake="http://drake.mit.edu" version="1.8">
-  <model name='textured'>
-    <link name='textured'>
+  <model name='cup'>
+    <link name='cup'>
       <inertial>
         <pose>-0.0006469711931728185 0.006327676350741114 0.029695734426806158 0 0 0</pose>
         <mass>0.05031916722564865</mass>
