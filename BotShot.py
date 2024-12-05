@@ -226,7 +226,7 @@ key_frame_poses = compose_circular_key_frames(thetas, X_WCenter, radius)
 visualize_key_frames(key_frame_poses)
 
 X_WGinit = painter.get_X_WG()
-total_time = 20
+total_time = 1000
 key_frame_poses = [X_WGinit] + compose_circular_key_frames(thetas, X_WCenter, radius)
 times = np.linspace(0, total_time, num_key_frames + 1)
 traj = PiecewisePose.MakeLinear(times, key_frame_poses)
