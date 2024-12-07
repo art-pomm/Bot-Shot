@@ -83,7 +83,7 @@ directives:
     parent: world
     child: camera4::base
     X_PC:
-        translation: [1.2, -0.45, 0.25]
+        translation: [1.2, -0.45, 0.5]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera5
@@ -92,7 +92,7 @@ directives:
     parent: world
     child: camera5::base
     X_PC:
-        translation: [-1.2, -0.45, 0.25]
+        translation: [-1.2, -0.45, 0.5]
         rotation: !Rpy { deg: [180, 90, 180]}
 
 # Add cameras
