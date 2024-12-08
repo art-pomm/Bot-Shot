@@ -38,7 +38,7 @@ directives:
 # Add cup
 - add_model:
     name: cup
-    file: package://bot_shot/models/cup.sdf
+    file: package://bot_shot/models/cup/cup.sdf
 # Add cameras
 - add_model:
     name: camera0
