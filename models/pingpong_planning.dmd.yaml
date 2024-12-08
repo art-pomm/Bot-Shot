@@ -7,6 +7,25 @@ directives:
 - add_model:
     name: table
     file: package://bot_shot/models/table.sdf
+# Add obstacles
+- add_model:
+    name: cracker_box
+    file: package://manipulation/hydro/003_cracker_box.sdf
+- add_weld:
+    parent: world
+    child: cracker_box::base_link_cracker
+    X_PC:
+        translation: [0, -0.2, 0.3]
+        rotation: !Rpy { deg: [0, 0, 45]}
+- add_model:
+    name: soup_can
+    file: package://manipulation/hydro/005_tomato_soup_can.sdf
+- add_weld:
+    parent: world
+    child: soup_can::base_link_soup
+    X_PC:
+        translation: [0.2, 0.35, 0.3]
+        rotation: !Rpy { deg: [0, 0, 15]}
 # Add cameras
 - add_model:
     name: camera0
@@ -24,7 +43,7 @@ directives:
     parent: world
     child: camera1::base
     X_PC:
-        translation: [1.2, 0.45, 0.25]
+        translation: [0.8, 0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera2
@@ -33,7 +52,7 @@ directives:
     parent: world
     child: camera2::base
     X_PC:
-        translation: [-1.2, 0.45, 0.25]
+        translation: [-0.8, 0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 180]}
 - add_model:
     name: camera3
@@ -51,7 +70,7 @@ directives:
     parent: world
     child: camera4::base
     X_PC:
-        translation: [1.2, -0.45, 0.5]
+        translation: [0.8, -0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera5
@@ -60,5 +79,5 @@ directives:
     parent: world
     child: camera5::base
     X_PC:
-        translation: [-1.2, -0.45, 0.5]
+        translation: [-0.8, -0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 180]}

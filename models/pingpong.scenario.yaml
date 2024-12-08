@@ -35,6 +35,13 @@ directives:
 - add_model:
     name: table
     file: package://bot_shot/models/table.sdf
+# Add obstacles
+- add_model:
+    name: cracker_box
+    file: package://manipulation/hydro/003_cracker_box.sdf
+- add_model:
+    name: soup_can
+    file: package://manipulation/hydro/005_tomato_soup_can.sdf
 # Add cup
 - add_model:
     name: cup
@@ -56,7 +63,7 @@ directives:
     parent: world
     child: camera1::base
     X_PC:
-        translation: [1.2, 0.45, 0.25]
+        translation: [0.8, 0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera2
@@ -65,7 +72,7 @@ directives:
     parent: world
     child: camera2::base
     X_PC:
-        translation: [-1.2, 0.45, 0.25]
+        translation: [-0.8, 0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 180]}
 - add_model:
     name: camera3
@@ -83,7 +90,7 @@ directives:
     parent: world
     child: camera4::base
     X_PC:
-        translation: [1.2, -0.45, 0.5]
+        translation: [0.8, -0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 0]}
 - add_model:
     name: camera5
@@ -92,7 +99,7 @@ directives:
     parent: world
     child: camera5::base
     X_PC:
-        translation: [-1.2, -0.45, 0.5]
+        translation: [-0.8, -0.45, 0.45]
         rotation: !Rpy { deg: [180, 90, 180]}
 
 # Add cameras
