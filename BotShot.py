@@ -91,7 +91,8 @@ class ControllerState(Enum):
     WAIT_FOR_OBJECTS_TO_SETTLE = 1
     PICKING_FROM_TABLE = 2
     GO_HOME = 3
-    THROWING = 4
+    PREP_THROW = 4
+    THROWING = 5
 
 
 # In[45]:
@@ -220,7 +221,7 @@ class ControlSystem(LeafSystem):
         elif mode == ControllerState.PICKING_FROM_TABLE:
             traj_X_G = context.get_abstract_state(int(self._traj_X_G_index)).get_value()
             if not traj_X_G.is_time_in_range(current_time):
-                state.get_mutable_abstract_state(int(self._mode_index)).set_value(ControllerState.THROWING)
+                state.get_mutable_abstract_state(int(self._mode_index)).set_value(ControllerState.PREP_THROW)
                 #self.GoHome(context, state)
                 self.Plan(context, state)
                 return
@@ -238,12 +239,23 @@ class ControlSystem(LeafSystem):
                 # stop and replan.
                 self.GoHome(context, state)
                 return
-        elif mode == ControllerState.THROWING: 
-            #print("hello from throwing in update")
+        elif mode == ControllerState.PREP_THROW: 
+            #
             traj_X_G = context.get_abstract_state(int(self._traj_X_G_index)).get_value()
             if not traj_X_G.is_time_in_range(current_time):
-                #self.GoHome(context, state)
+                print("hello from if statement PREP_THROW in update")
+                state.get_mutable_abstract_state(int(self._mode_index)).set_value(ControllerState.THROWING)
                 self.Plan(context, state)
+                #self.GoHome(context, state)
+                
+                return
+        elif mode == ControllerState.THROWING: 
+            print("aloha from THROWING")
+            traj_X_G = context.get_abstract_state(int(self._traj_X_G_index)).get_value()
+            if not traj_X_G.is_time_in_range(current_time):
+                state.get_mutable_abstract_state(int(self._mode_index)).set_value(ControllerState.GO_HOME)
+                self.GoHome(context, state)
+                #self.Plan(context, state)
                 return
                 
 
@@ -387,7 +399,7 @@ class ControlSystem(LeafSystem):
             state.get_mutable_abstract_state(int(self._times_index)).set_value(t_lst)
             state.get_mutable_abstract_state(int(self._traj_X_G_index)).set_value(q_traj)
             state.get_mutable_abstract_state(int(self._traj_wsg_index)).set_value(traj_wsg_command)
-        if mode == ControllerState.THROWING: 
+        if mode == ControllerState.PREP_THROW: 
                 # Get current gripper pose in world frame
             X_current = self.get_input_port(0).Eval(context)[int(self._gripper_body_index)]
 
@@ -410,7 +422,7 @@ class ControlSystem(LeafSystem):
 
             # For the gripper, you can keep it closed if you're holding the ball
             closed = np.array([0.0])
-            traj_wsg = PiecewisePolynomial.FirstOrderHold([current_time, end_time],
+            traj_wsg = PiecewisePolynomial.FirstOrderHold([current_time, end_time + 1.0],
                                                         np.hstack([[closed], [closed]]))
             state.get_mutable_abstract_state(int(self._traj_wsg_index)).set_value(traj_wsg)
             
@@ -429,6 +441,119 @@ class ControlSystem(LeafSystem):
             # )
             # state.get_mutable_abstract_state(int(self._traj_q_index)).set_value(q_traj)
             # print("hello from Throwing in plan")
+
+        if mode == ControllerState.THROWING: 
+                # Current end-effector pose
+            X_current = self.get_input_port(0).Eval(context)[int(self._gripper_body_index)]
+
+            # Define an "underhand" orientation:
+            R_underhand = RotationMatrix(RollPitchYaw([-2.356194, 0.04184365, 0.0]))
+
+            # Desired intermediate and release poses
+            X_ready = RigidTransform(R_underhand, [0.0, 0.45, 0.40])  # slightly behind and below final
+            X_release = RigidTransform(R_underhand, [0.0, 0.4, 0.45])
+
+            current_time = context.get_time()
+
+            # Times for each segment
+            ready_duration = 0.8
+            flick_duration = 0.4
+            delta_t = 0.05
+
+            ready_time = current_time + ready_duration
+            release_time = ready_time + flick_duration
+
+            # Desired small velocity "flick"
+            desired_v = np.array([0.0, -0.5, 1.5])
+            next_pose = RigidTransform(
+                R_underhand,
+                X_release.translation() + desired_v * delta_t
+            )
+
+            # Collect all times and poses
+            times = [
+                current_time,
+                ready_time,
+                release_time,
+                release_time + delta_t
+            ]
+            poses = [
+                X_current,
+                X_ready,
+                X_release,
+                next_pose
+            ]
+
+            # Create the piecewise pose from these waypoints
+            traj_X_G = PiecewisePose.MakeLinear(times, poses)
+
+            # Gripper trajectory (closed → open)
+            closed = np.array([0.0])
+            opened = np.array([0.107])
+            traj_wsg = PiecewisePolynomial.FirstOrderHold(
+                [current_time, release_time], np.hstack([[closed], [closed]])
+            )
+            traj_wsg.AppendFirstOrderSegment(release_time + 0.01, opened)
+
+            # Update state
+            state.get_mutable_abstract_state(int(self._traj_X_G_index)).set_value(traj_X_G)
+            state.get_mutable_abstract_state(int(self._traj_wsg_index)).set_value(traj_wsg)
+            # # Current end-effector pose
+            # X_current = self.get_input_port(0).Eval(context)[int(self._gripper_body_index)]
+
+            # # Desired release pose and orientation
+            # # Orientation can remain similar to current or slightly angled
+            # R_target = RotationMatrix(RollPitchYaw([-2.356194, 0.04184365, 0.0])) 
+            # X_release = RigidTransform(R_target, [0.0, 0.4, 0.45])
+
+            # # We'll give ourselves some time to move to the release pose.
+            # current_time = context.get_time()
+            # release_duration = 1.0  # time to move hand into release position
+            # release_time = current_time + release_duration
+
+            # # Create a pose trajectory from current pose to the release pose
+            # traj_X_G = PiecewisePose.MakeLinear(
+            #     [current_time, release_time],
+            #     [X_current, X_release]
+            # )
+
+            # # Now we want the manipulator to "throw" the ball by imparting a velocity.
+            # # We'll simulate this by adding a short, fast movement segment that achieves
+            # # the desired end-effector velocity at release_time.
+
+            # # Compute a small displacement to achieve the needed velocity.
+            # # In a differential IK setting, we could specify a desired end-effector velocity.
+            # # Here, let's just approximate by adding another keyframe slightly after release_time.
+            # # If delta_t is small, position change ~ velocity * delta_t.
+            # delta_t = 0.05
+            # desired_v = np.array([0.0, -1.0, 2.05])  # m/s
+            # next_pose = RigidTransform(
+            #     R_target,
+            #     X_release.translation() + desired_v * delta_t
+            # )
+
+            # # Extend the trajectory a bit beyond release_time
+            # #traj_X_G.AppendLinearSegment(release_time + delta_t, next_pose)
+
+            # # For the gripper, we want it closed until we release the ball.
+            # # At release_time, we'll open it. We'll create a wsg trajectory:
+            # closed = np.array([0.0])
+            # opened = np.array([0.107])
+            # traj_wsg = PiecewisePolynomial.FirstOrderHold(
+            #     [current_time, release_time], np.hstack([[closed], [closed]])
+            # )
+            # # Open right after release
+            # traj_wsg.AppendFirstOrderSegment(release_time + 0.01, opened)
+
+            # # Update state
+            # state.get_mutable_abstract_state(int(self._traj_X_G_index)).set_value(traj_X_G)
+            # state.get_mutable_abstract_state(int(self._traj_wsg_index)).set_value(traj_wsg)
+
+            # # sample_times = np.linspace(current_time, release_time + delta_t, 10)
+            # # for i, t_i in enumerate(sample_times):
+            # #     X_t = traj_X_G.GetPose(t_i)
+            # #     AddMeshcatTriad(meshcat, path=f"throwing_traj/sample_{i}", X_PT=X_t, length=0.05, radius=0.002, opacity=0.4)
+
 
 
     def CalcControlMode(self, context, output):
@@ -622,14 +747,14 @@ class PoseEstimator(LeafSystem):
         cloud.mutable_xyzs()[:] = model_pcd
         cloud = cloud.VoxelizedDownSample(voxel_size=0.005)
         
-        X_WOhat, chat = IterativeClosestPoint(
-            cloud.xyzs(),
-            scene_pcd.xyzs(),
-            meshcat=meshcat,
-            meshcat_scene_path="icp_scene",
-        )
-        print(X_WOhat)
-        #X_WOhat = RigidTransform() #TODO remove and uncomment above
+        # X_WOhat, chat = IterativeClosestPoint(
+        #     cloud.xyzs(),
+        #     scene_pcd.xyzs(),
+        #     meshcat=meshcat,
+        #     meshcat_scene_path="icp_scene",
+        # )
+        # print(X_WOhat)
+        X_WOhat = RigidTransform() #TODO remove and uncomment above
         output.set_value(X_WOhat)
 
 
@@ -1114,7 +1239,7 @@ class RoboTossStationSim:
         self.logger = logger.FindLog(self.context_diagram)
         simulator.set_target_realtime_rate(1.0)
         meshcat.StartRecording()
-        simulator.AdvanceTo(17 if running_as_notebook else 0.1)
+        simulator.AdvanceTo(23 if running_as_notebook else 0.1)
         meshcat.PublishRecording()
 
 
